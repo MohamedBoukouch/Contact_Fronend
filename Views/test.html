@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Data</title>
+</head>
+<body>
+    <h1>User Information</h1>
+    <div id="userData"></div>
+
+    <script>
+        // Fetch session data from the server
+        fetch('http://localhost:9080/gnotes/api/v1/user/home', {
+            method: 'GET',
+            credentials: 'include', // Send cookies
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch user data');
+            }
+            return response.json(); // Convert response to JSON
+        })
+        .then(data => {
+            // Display user data on the HTML page
+            const userDataDiv = document.getElementById('userData');
+            userDataDiv.innerHTML = `
+                <p><strong>User ID:</strong> ${data.id}</p>
+                <p><strong>Email:</strong> ${data.email}</p>
+                <p><strong>Role:</strong> ${data.isadmin === 1 ? 'Admin' : 'User'}</p>
+            `;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Display error message on the HTML page
+            const userDataDiv = document.getElementById('userData');
+            userDataDiv.innerHTML = '<p>Error fetching user data</p>';
+        });
+    </script>
+</body>
+</html>

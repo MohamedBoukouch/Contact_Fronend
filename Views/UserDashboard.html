@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table Design</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+
+  <style>
+    /* Custom CSS for adding margin */
+    .table-container {
+      margin-top: 20px; /* Adjust the value as needed */
+      position: relative; /* Needed for positioning the logout icon */
+    }
+
+    /* Custom CSS for logout image */
+    .logout {
+      position: absolute;
+      top: -20px; /* Adjust the top position */
+      right: 10px; /* Adjust the right position */
+    }
+
+    .search-input {
+      width: 300px;
+      padding: 8px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+    }
+
+    .search-btn {
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 20px;
+      padding: 8px 15px;
+      cursor: pointer;
+    }
+
+    .search-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .head-title {
+      display: flex;
+      align-items: center;
+    }
+
+    .autocomplete-items {
+      position: absolute;
+      border: 1px solid #d4d4d4;
+      border-radius: 5px;
+      z-index: 99;
+      width: 100%;
+      background-color: #f1f1f1;
+    }
+
+    .autocomplete-item {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .autocomplete-item:hover {
+      background-color: #e9e9e9;
+    }
+    .table-container {
+      margin-top: 20px; /* Adjust the value as needed */
+      position: relative; /* Needed for positioning the logout icon */
+    }
+
+    /* Custom CSS for logout image */
+    .logout {
+      position: absolute;
+      top: -20px; /* Adjust the top position */
+      right: 10px; /* Adjust the right position */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Logout Image -->
+    <div class="logout">
+      <img src="/images/logout.png" alt="Logout Icon" style="width: 30px; height: 30px;">
+    </div>
+
+    <!-- addContactForm-->
+    <div class="table-container">
+      <!-- Add Contact Form -->
+      <form id="addContactForm" class="add-contact-form" style="display: none;">
+        <div class="form-group">
+          <label for="nom">Nom</label>
+          <input type="text" class="form-control" id="nom" placeholder="Enter Nom">
+        </div>
+        <div class="form-group">
+          <label for="tel">Tel</label>
+          <input type="text" class="form-control" id="tel" placeholder="Enter Tel">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" class="form-control" id="email" placeholder="Enter Email">
+        </div>
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input type="text" class="form-control" id="address" placeholder="Enter Address">
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+        <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+      </form>
+
+      
+    <div class="table-container">
+      <table class="table table-bordered" style="margin-top: 40px;">
+        <thead>
+          <tr>
+            <th colspan="4">
+              <div class="head-title">
+                <form action="#" class="google-search-form">
+                  <div class="form-input">
+                    <input type="search" placeholder="Search..." class="search-input" id="searchInput">
+                    <div class="autocomplete-items" id="autocompleteItems"></div>
+                    <button type="submit" class="search-btn"><i class='uil uil-search'></i></button>
+                  </div>
+            </th>
+            <th><img src="/images/plus.png" alt="Refresh Icon" style="width: 30px; height: 30px; " id="refreshBtn"></th>
+          </tr>
+        </thead>
+        <tbody id="contactTableBody">
+          <!-- Table body headers -->
+          <tr>
+            <td>Nom</td>
+            <td>Tel</td>
+            <td>Email</td>
+            <td>Adresse</td>
+            <td><img src="/images/refresh.png" alt="Refresh Icon" style="width: 30px; height: 30px;"></td>
+            <td><img src="/images/delete.png" alt="Delete Icon" class="delete-icon" style="color: red; width: 30px; height: 30px;"></td>
+          </tr>
+          <!-- Dynamic data will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+
+  <!-- JavaScript code to fetch data from API and populate the table -->
+
+  <script>        // Function to parse URL query parameters
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    };
+  
+    // Get user ID from URL query parameter
+    var userId = getUrlParameter('id');
+    </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const contactTableBody = document.getElementById("contactTableBody");
+      const user_id = 312; // Replace 123 with the actual user ID
+
+      // Function to fetch contacts from the API
+      function fetchContacts() {
+        const formData = new URLSearchParams();
+        formData.append('userid', userId);
+
+        fetch('http://localhost:9080/econtact/api/contact/selectcontact', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          displayContacts(data);
+        })
+        .catch(error => console.error('Error fetching contacts:', error));
+      }
+
+      // Function to display contacts in the table
+      function displayContacts(contacts) {
+        contacts.forEach(contact => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${contact.nom}</td>
+            <td>${contact.tel}</td>
+            <td>${contact.email}</td>
+            <td>${contact.address}</td>
+            <td><img src="/images/refresh.png" alt="Refresh Icon" class="update-icon" style="width: 30px; height: 30px;" id="updateBtn"></td>
+            <td><img src="/images/delete.png" alt="Delete Icon" class="delete-icon" style="color: red; width: 30px; height: 30px;"></td>
+          `;
+          contactTableBody.appendChild(tr);
+
+           // Add event listener to delete icons
+          const deleteIcons = document.querySelectorAll('.delete-icon');
+          deleteIcons.forEach(icon => {
+          icon.addEventListener('click', function() {
+            const contactId = contact.id;
+            deleteContact(contactId);
+          });
+          });
+
+          //Update
+          const updatedeleteIcons = document.querySelectorAll('.update-icon');
+          deleteIcons.forEach(icon => {
+          icon.addEventListener('click', function() {
+            showUpdateForm(contact);
+          });
+          });
+
+          
+        });
+      }
+
+      //Update
+  function showUpdateForm(contact) {
+
+  document.addEventListener("DOMContentLoaded", () => {
+  const addContactForm = document.getElementById("addContactForm");
+  const refreshBtn = document.getElementById("refreshBtn");
+
+  // Show add contact form when refresh button is clicked
+  refreshBtn.addEventListener('click', () => {
+    addContactForm.style.display = 'block';
+  });
+  // Form submission to add contact
+  addContactForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nom = document.getElementById("nom").value;
+    const tel = document.getElementById("tel").value;
+    const email = document.getElementById("email").value;
+    const address = document.getElementById("address").value;
+
+    const formData = new URLSearchParams();
+    formData.append('nom', nom);
+    formData.append('tel', tel);
+    formData.append('email', email);
+    formData.append('addresse', address);
+    formData.append('userId', userId);
+
+    fetch('http://localhost:9080/econtact/api/contact/addcontact', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      window.location.href = `UserDashboard.html?id=${userId}`;
+    })
+    .catch(error => console.error('Error adding contact:', error));
+  });
+});
+}
+      function deleteContact(contactId) {
+      const formData = new URLSearchParams();
+      formData.append('contactId', contactId);
+
+        fetch('http://localhost:9080/econtact/api/contact/deletcontact', {
+          method: 'POST',
+          headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: formData
+        })
+        .then(response => {
+          if (response.ok) {
+            // If deletion is successful, remove the contact from the table
+            // const tr = document.querySelector(`[data-contact-id="${contactId}"]`);
+            window.location.href = `UserDashboard.html?id=${userId}`;
+          } else {
+            throw new Error('Failed to delete contact');
+          }
+        })
+        .catch(error => console.error('Error deleting contact:', error));
+      }
+      // Fetch contacts when the page is loaded
+      fetchContacts();
+    });
+  </script>
+
+<!-- ADDCONTACT -->
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+  const addContactForm = document.getElementById("addContactForm");
+  const refreshBtn = document.getElementById("refreshBtn");
+
+  // Show add contact form when refresh button is clicked
+  refreshBtn.addEventListener('click', () => {
+    addContactForm.style.display = 'block';
+  });
+  
+  // // Hide add contact form when cancel button is clicked
+  // document.getElementById('cancelBtn').addEventListener('click', () => {
+  //   addContactForm.style.display = 'none';
+  // });
+
+  // Form submission to add contact
+  addContactForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nom = document.getElementById("nom").value;
+    const tel = document.getElementById("tel").value;
+    const email = document.getElementById("email").value;
+    const address = document.getElementById("address").value;
+
+    const formData = new URLSearchParams();
+    formData.append('nom', nom);
+    formData.append('tel', tel);
+    formData.append('email', email);
+    formData.append('addresse', address);
+    formData.append('userId', userId);
+
+    fetch('http://localhost:9080/econtact/api/contact/addcontact', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      window.location.href = `UserDashboard.html?id=${userId}`;
+    })
+    .catch(error => console.error('Error adding contact:', error));
+  });
+  });
+  </script>
+
+
+<!-- Update   -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  const addContactForm = document.getElementById("addContactForm");
+  const refreshBtn = document.getElementById("updateBtn");
+
+  // Show add contact form when refresh button is clicked
+  refreshBtn.addEventListener('click', () => {
+    addContactForm.style.display = 'block';
+  });
+  
+  // // Hide add contact form when cancel button is clicked
+  document.getElementById('cancelBtn').addEventListener('click', () => {
+    addContactForm.style.display = 'none';
+  });
+
+  // Form submission to add contact
+  addContactForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nom = document.getElementById("nom").value;
+    const tel = document.getElementById("tel").value;
+    const email = document.getElementById("email").value;
+    const address = document.getElementById("address").value;
+
+    const formData = new URLSearchParams();
+    formData.append('nom', nom);
+    formData.append('tel', tel);
+    formData.append('email', email);
+    formData.append('addresse', address);
+    formData.append('userId', userId);
+
+    fetch('http://localhost:9080/econtact/api/contact/addcontact', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      window.location.href = `UserDashboard.html?id=${userId}`;
+    })
+    .catch(error => console.error('Error adding contact:', error));
+  });
+  });
+  </script>
+</body>
+</html>
